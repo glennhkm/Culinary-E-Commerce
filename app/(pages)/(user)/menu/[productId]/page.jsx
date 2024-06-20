@@ -99,7 +99,7 @@ const DetailMenu = ({ params }) => {
       toast.error("Anda tidak bisa memesan produk sebagai admin!");
     } else if (isGuestRole) {
       router.push(
-        `/auth/sign-in/?callbackUrl=http%3A%2F%2Flocalhost%3A3000${pathname}`
+        `/auth/sign-in/?callbackUrl=${pathname}`
       );
       toast("Login terlebih dahulu untuk memesan produk!", {
         icon: "🔒",
