@@ -1,6 +1,5 @@
-import { dataUser } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
-import { set } from "date-fns";
 import { CircleX, Utensils } from "lucide-react";
 import Image from "next/legacy/image";
 import { useRouter } from "next/navigation";
@@ -35,7 +34,12 @@ export const CardOrder = ({ closeModal, product, variants, selectedVariant }) =>
       }
     }
 
-    setUserData(dataUser());
+    const getUserData = async () => {
+      const session = await checkUserRole();
+      setUserData(session?.data);
+    }
+
+    getUserData();
     getPaymentMethod();
   }, [])
 

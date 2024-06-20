@@ -7,7 +7,7 @@ import Link from "next/link";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { isGuest } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 
 const SignIn = () => {
   const [userData, SetUserData] = useState({
@@ -21,9 +21,15 @@ const SignIn = () => {
   const callbackUrl = searchParams.get('callbackUrl');
 
   useEffect(() => {
-    if (!isGuest()) {
-      router.push("/");
-    };
+    const checkRole = async () => {
+      const session = await checkUserRole();
+      if (!session?.isGuest) {
+        router.push("/");
+      }
+      return;
+    }
+
+    checkRole();
   }, []);
 
   const handleChange = (e) => {

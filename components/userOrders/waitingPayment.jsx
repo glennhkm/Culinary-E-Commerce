@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/formatDate/formatDate";
-import { dataUser, isUser, isAdmin } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
 import { isAfter } from "date-fns";
 import Image from "next/legacy/image";
@@ -9,9 +9,7 @@ import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-o
 import toast from "react-hot-toast";
 
 export const WaitingPayment = () => {
-  const [idUser, setIdUser] = useState(null);
-  const [isAdminRole, setIsAdminRole] = useState(null);
-  const [isUserRole, setIsUserRole] = useState(null);
+  const [role, setRole] = useState({});
   const [transaction, setTransaction] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
@@ -21,12 +19,12 @@ export const WaitingPayment = () => {
 
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser();
-      setIdUser(data?.id);
+      const roleData = await checkUserRole();
+      setRole(roleData);
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {
-          params: { status1: "MENUNGGU_PEMBAYARAN", idUser: data?.id},
+          params: { status1: "MENUNGGU_PEMBAYARAN", idUser: roleData?.data?.id},
         });         
         if (response.status === 200) {
           const transactionSorted = response.data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
@@ -56,8 +54,6 @@ export const WaitingPayment = () => {
       }
     };
 
-    setIsAdminRole(isAdmin());
-    setIsUserRole(isUser());
     getTransaction();
   }, [updateTrigger]);
 
@@ -69,7 +65,7 @@ export const WaitingPayment = () => {
   const handleCancelTransaction = async (selectedTransaction) => {
     const toastLoad = toast.loading("Memproses...")
     try {
-      const response = await axios.patch(`/api/transaction/${selectedTransaction.id}`, { status: 'DIBATALKAN', message: isAdminRole ? 'ADMIN telah membatalkan pesanan ini' : 'Anda telah membatalkan pesanan ini', transaction: selectedTransaction });
+      const response = await axios.patch(`/api/transaction/${selectedTransaction.id}`, { status: 'DIBATALKAN', message: role.isAdmin ? 'ADMIN telah membatalkan pesanan ini' : 'Anda telah membatalkan pesanan ini', transaction: selectedTransaction });
       if(response.status === 200) {
         toast.dismiss(toastLoad);
         toast.success('Berhasil membatalkan transaksi');
@@ -123,12 +119,12 @@ export const WaitingPayment = () => {
             </p>
           </div>          
           <div className="flex gap-2">
-            {isUserRole && (
+            {role.isUser && (
               <button onClick={() => handleClickPayment(item)} className="bg-green-600 active:scale-[0.98] text-main_bg font-bold rounded-xl w-1/2 py-2 shadow-md shadow-black/40 text-[0.82rem] hover:bg-opacity-60 duration-200">Konfirmasi Pembayaran</button>            
             )}
             <Dropdown className="outline-none focus:outline-none bg-transparent">
               <DropdownTrigger className="focus:outline-none focus:ring-0 ring-0 outline-none">
-                <button className={`bg-primary active:scale-[0.98] text-main_bg font-bold rounded-xl ${isUserRole ? 'w-1/2' : 'w-full'} px-2 py-2 shadow-md shadow-black/40 text-sm hover:bg-dark_primary duration-200`}>Batalkan Pesanan</button>
+                <button className={`bg-primary active:scale-[0.98] text-main_bg font-bold rounded-xl ${role.isUser ? 'w-1/2' : 'w-full'} px-2 py-2 shadow-md shadow-black/40 text-sm hover:bg-dark_primary duration-200`}>Batalkan Pesanan</button>
               </DropdownTrigger>
               <DropdownMenu className="bg-[#151515] border-[0.16px] border-main_bg/40 rounded-xl outline-none ring-0 w-full p-4">
                 <DropdownItem className="hover:bg-[#151515] border-none ring-0 outline-none w-full">

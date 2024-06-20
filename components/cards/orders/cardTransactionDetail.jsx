@@ -1,7 +1,8 @@
 import { formatDate } from "@/lib/formatDate/formatDate";
-import { isAdmin, isUser } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@nextui-org/dropdown";
 import axios from "axios";
+import { se } from "date-fns/locale";
 import { CircleAlert, CircleX, HandCoins, Pencil, Save, X } from "lucide-react";
 import Image from "next/legacy/image";
 import React, { useEffect, useState } from "react";
@@ -31,8 +32,13 @@ export const CardTransactionDetail = ({ updateTrigger, closeModal, transaction }
       }
     }
 
-    setIsAdminRole(isAdmin());
-    setIsUserRole(isUser());
+    const setRole = async () => {
+      const roleData = await checkUserRole();
+      setIsAdminRole(roleData?.isAdmin);
+      setIsUserRole(roleData?.isUser);
+    }
+
+    setRole();
     getPaymentConfirmation();
   }, []);
 

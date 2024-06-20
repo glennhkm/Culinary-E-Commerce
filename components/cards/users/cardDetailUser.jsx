@@ -9,7 +9,7 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@nextui-org/dropdown";
-import { isAdmin } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 
 export const CardDetailUser = ({ closeModal, userId }) => {
   const [isEditing, SetIsEditing] = useState(false);
@@ -37,8 +37,13 @@ export const CardDetailUser = ({ closeModal, userId }) => {
       }
     };
 
+    const setRole = async () => {
+      const roleData = await checkUserRole();
+      setIsAdminRole(roleData?.isAdmin);
+    }
+
     document.addEventListener("mousedown", handleClickOutside);
-    setIsAdminRole(isAdmin());
+    setRole();
     getUserData();
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

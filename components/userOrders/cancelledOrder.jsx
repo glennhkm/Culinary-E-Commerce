@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/formatDate/formatDate";
-import { dataUser, isAdmin } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
 import { ArchiveX, Ellipsis, ReceiptText, Trash2 } from "lucide-react";
 import Image from "next/legacy/image";
@@ -11,17 +11,19 @@ import toast from "react-hot-toast";
 
 export const CancelledOrder = () => {
   const [transaction, setTransaction] = useState([]);
+  const [role, setRole] = useState({});
   const [loading, setLoading] = useState(false);
   const [detailTransaction, setDetailTransaction] = useState(null);
   const [updateTrigger, setUpdateTrigger] = useState(false);
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser();
+      const roleData = await checkUserRole();
+      setRole(roleData);
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {
-          params: { status1: "DIBATALKAN", idUser: data?.id},
+          params: { status1: "DIBATALKAN", idUser: roleData?.data?.id},
         });
         if (response.status === 200) {
           const transactionSorted = response.data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
@@ -103,7 +105,7 @@ export const CancelledOrder = () => {
                 minimumFractionDigits: 0,
               }).format(item.totalPrice)}
             </p>
-            <p className="text-xs text-secondary text-start">{isAdmin() ? item.message.replaceAll("Anda", "USER") : item.message}</p>
+            <p className="text-xs text-secondary text-start">{role.isAdmin ? item.message.replaceAll("Anda", "USER") : item.message}</p>
           </div>
           <div className="flex gap-4">
             <Dropdown className="bg-transparent">

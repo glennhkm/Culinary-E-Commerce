@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/formatDate/formatDate";
-import { dataUser, isUser } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
 import { ArchiveRestore, Ellipsis, Truck } from "lucide-react";
 import Image from "next/legacy/image";
@@ -14,17 +14,16 @@ export const OnProcess = () => {
   const [updateTrigger, setUpdateTrigger] = useState(false);
   const [loading, setLoading] = useState(false);
   const [detailTransaction, setDetailTransaction] = useState(false);
-  const [idUser, setIdUser] = useState(null);
-  const [isUserRole, setIsUserRole] = useState(null);
+  const [role, setRole] = useState({});
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser();
-      setIdUser(data?.id);
+      const roleData = await checkUserRole();
+      setRole(roleData);
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {
-          params: { status1: "MENUNGGU_APPROVAL", status2: "DIKIRIM", idUser: data?.id },
+          params: { status1: "MENUNGGU_APPROVAL", status2: "DIKIRIM", idUser: roleData?.data?.id },
         });
         if (response.status === 200) {
           const transactionSorted = response.data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
@@ -37,7 +36,6 @@ export const OnProcess = () => {
       }
     }
 
-    setIsUserRole(isUser());
     getTransaction();
   }, [updateTrigger]);
 
@@ -110,7 +108,7 @@ export const OnProcess = () => {
             </p>
           </div>
           <div className="flex gap-4">
-            {(item.status === "DIKIRIM" && isUserRole) && (
+            {(item.status === "DIKIRIM" && role.isUser) && (
               <Dropdown className="outline-none focus:outline-none bg-transparent">
                 <DropdownTrigger className="focus:outline-none focus:ring-0 ring-0 outline-none">
                   <button className={`bg-green-600 active:scale-[0.98] text-main_bg font-bold rounded-xl w-full px-2 py-2 shadow-md shadow-black/40 text-sm hover:bg-opacity-60 duration-200`}>Konfirmasi Pesanan Telah Sampai</button>

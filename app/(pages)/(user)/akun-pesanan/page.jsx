@@ -5,7 +5,7 @@ import { CancelledOrder } from "@/components/userOrders/cancelledOrder";
 import { OnProcess } from "@/components/userOrders/onProcess";
 import { OrderDone } from "@/components/userOrders/orderDone";
 import { WaitingPayment } from "@/components/userOrders/waitingPayment";
-import { dataUser } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole, dataUser } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
 import { Save, SquarePen, X } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -14,10 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const AkunPesanan = () => {
-  const [userData, setUserData] = useState(() => {
-    const { id, fullName, address, email, phoneNumber } = dataUser();
-    return { id, fullName, address, email, phoneNumber };
-  });
+  const [userData, setUserData] = useState(() => {});
   const [lastUserData, setLastUserData] = useState({ ...userData });
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -62,6 +59,13 @@ const AkunPesanan = () => {
       }
     }
 
+    const setDataUser = async () => {
+      const session = await checkUserRole();
+      const { id, fullName, address, email, phoneNumber } = session?.data;
+      setUserData({ id, fullName, address, email, phoneNumber });
+    }
+
+    setDataUser();
     scrollToMenuOrder();
   }, []);
 

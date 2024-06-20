@@ -1,5 +1,5 @@
 import { formatDate } from "@/lib/formatDate/formatDate";
-import { dataUser } from "@/lib/sessionManagement/sessionCheck";
+import { checkUserRole } from "@/lib/sessionManagement/sessionCheck";
 import axios from "axios";
 import { TicketCheck, Ellipsis, Trash2, ReceiptText } from "lucide-react";
 import Image from "next/legacy/image";
@@ -17,11 +17,11 @@ export const OrderDone = () => {
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser();
+      const roleData = await checkUserRole();
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {
-          params: { status1: "SELESAI", idUser: data?.id},
+          params: { status1: "SELESAI", idUser: roleData?.data?.id},
         });
         if (response.status === 200) {
           const transactionSorted = response.data.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
