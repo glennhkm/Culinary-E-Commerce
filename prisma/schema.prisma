@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Status {
+  MENUNGGU_PEMBAYARAN
+  MENUNGGU_APPROVAL
+  DIKIRIM
+  SELESAI
+  DIBATALKAN
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ImageProduct {
+  FEATURED
+  GALLERY
+}
+
+model Users {
+  id                String        @id @default(uuid())
+  profilePictureUrl String?       @default("/images/default-avatar.png")
+  profilePictureKey String?
+  fullName          String
+  email             String        @unique
+  phoneNumber       String?
+  password          String
+  address           String?       @db.Text
+  role              Role          @default(USER)
+  transactions      Transaction[]
+
+  @@map("Users")
+}
+
+model ProductCategories {
+  id           String     @id @default(uuid())
+  categoryName String
+  description  String?
+  products     Products[]
+
+  @@map("ProductCategories")
+}
+
+model Products {
+  id                String            @id @default(uuid())
+  productName       String
+  description       String?           @db.Text
+  stock             Int
+  price             Float
+  discount          Float?
+  bestSeller        Boolean           @default(false)
+  idProductCategory String
+  productCategory   ProductCategories @relation(fields: [idProductCategory], references: [id])
+  mediaAssets       MediaAssets[]
+  transactions      Transaction[]
+  variants          Variants[]
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("Products")
+}
+
+model Variants {
+  id              String        @id @default(uuid())
+  variantName     String
+  additionalPrice Int?          @default(0)
+  idProduct       String
+  product         Products      @relation(fields: [idProduct], references: [id], onDelete: Cascade)
+  Transaction     Transaction[]
+
+  @@map("Variants")
+}
+
+model MediaAssets {
+  id               String       @id @default(uuid())
+  mediaURL         String
+  mediaKey         String
+  imageProductType ImageProduct
+  idProduct        String
+  product          Products     @relation(fields: [idProduct], references: [id], onDelete: Cascade)
+
+  @@map("MediaAssets")
+}
+
+model Transaction {
+  id                  String                @id @default(uuid())
+  idProduct           String?
+  idUser              String?
+  idPaymentMethod     String?
+  idVariant           String?
+  fullName            String
+  phoneNumber         String
+  address             String                @db.Text
+  quantity            Int
+  additionalMessage   String?               @db.Text
+  totalPrice          Float
+  orderDate           DateTime              @default(now())
+  paymentDate         DateTime?
+  deadlinePaymentDate DateTime
+  status              Status                @default(MENUNGGU_PEMBAYARAN)
+  message             String?               @db.Text
+  product             Products?              @relation(fields: [idProduct], references: [id], onDelete: SetNull)
+  user                Users?                 @relation(fields: [idUser], references: [id], onDelete: SetNull)
+  paymentMethod       PaymentMethod?         @relation(fields: [idPaymentMethod], references: [id], onDelete: SetNull)
+  variant             Variants?             @relation(fields: [idVariant], references: [id], onDelete: SetNull)
+  paymentConfirmation PaymentConfirmation[]
+
+  @@map("Transaction")
+}
+
+model PaymentMethod {
+  id          String        @id @default(uuid())
+  method      String
+  noRekening  String?
+  Transaction Transaction[]
+
+  @@map("PaymentMethod")
+}
+
+model PaymentConfirmation {
+  id            String      @id @default(uuid())
+  idTransaction String
+  imageURL      String
+  imageKey      String
+  transaction   Transaction @relation(fields: [idTransaction], references: [id], onDelete: Cascade)
+
+  @@map("PaymentConfirmation")
+}
+
+model Dashboard {
+  id            String   @id @default(uuid())
+  title         String
+  value         Int
+
+  @@map("Dashboard")
+}
