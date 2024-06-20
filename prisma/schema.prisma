@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "cockroachdb"
   url      = env("DATABASE_URL")
 }
 
@@ -33,7 +33,7 @@ model Users {
   email             String        @unique
   phoneNumber       String?
   password          String
-  address           String?       @db.Text
+  address           String?
   role              Role          @default(USER)
   transactions      Transaction[]
 
@@ -52,7 +52,7 @@ model ProductCategories {
 model Products {
   id                String            @id @default(uuid())
   productName       String
-  description       String?           @db.Text
+  description       String?
   stock             Int
   price             Float
   discount          Float?
@@ -98,18 +98,18 @@ model Transaction {
   idVariant           String?
   fullName            String
   phoneNumber         String
-  address             String                @db.Text
+  address             String
   quantity            Int
-  additionalMessage   String?               @db.Text
+  additionalMessage   String?
   totalPrice          Float
   orderDate           DateTime              @default(now())
   paymentDate         DateTime?
   deadlinePaymentDate DateTime
   status              Status                @default(MENUNGGU_PEMBAYARAN)
-  message             String?               @db.Text
-  product             Products?              @relation(fields: [idProduct], references: [id], onDelete: SetNull)
-  user                Users?                 @relation(fields: [idUser], references: [id], onDelete: SetNull)
-  paymentMethod       PaymentMethod?         @relation(fields: [idPaymentMethod], references: [id], onDelete: SetNull)
+  message             String?
+  product             Products?             @relation(fields: [idProduct], references: [id], onDelete: SetNull)
+  user                Users?                @relation(fields: [idUser], references: [id], onDelete: SetNull)
+  paymentMethod       PaymentMethod?        @relation(fields: [idPaymentMethod], references: [id], onDelete: SetNull)
   variant             Variants?             @relation(fields: [idVariant], references: [id], onDelete: SetNull)
   paymentConfirmation PaymentConfirmation[]
 
@@ -136,9 +136,9 @@ model PaymentConfirmation {
 }
 
 model Dashboard {
-  id            String   @id @default(uuid())
-  title         String
-  value         Int
+  id    String @id @default(uuid())
+  title String
+  value Int
 
   @@map("Dashboard")
 }
