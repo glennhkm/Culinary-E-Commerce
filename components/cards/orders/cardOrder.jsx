@@ -35,7 +35,7 @@ export const CardOrder = ({ closeModal, product, variants, selectedVariant }) =>
       }
     }
 
-    setUserData(dataUser(window));
+    setUserData(dataUser());
     getPaymentMethod();
   }, [])
 

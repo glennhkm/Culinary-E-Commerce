@@ -92,7 +92,7 @@ export const Navbar = ({ className }) => {
                 </li>
               </Link>
             ))}
-            {isUser(window) && (
+            {isUser() && (
               <>
                 {userDropdown.map((item) => (
                   <button key={item.name} onClick={item.routeFunc} className={`flex gap-2 group items-center hover:scale-[1.02] active:scale-100 duration-200 ${pathname === item.url && 'bg-main_bg/40 px-6 rounded-3xl'}`}>
@@ -105,10 +105,10 @@ export const Navbar = ({ className }) => {
               </>
             )}
           </ul>
-          {(isGuest(window) || isAdmin(window)) && (
-            <Link href={isAdmin(window) ? `/admin` : '/auth/sign-in'}>
+          {(isGuest() || isAdmin()) && (
+            <Link href={isAdmin() ? `/admin` : '/auth/sign-in'}>
               <button className=" bg-secondary tracking-wide text-main_bg py-[0.6rem] px-7 rounded-3xl shadow-lg drop-shadow-lg text-sm duration-200 hover:bg-third hover:text-primary shadow-black/40">
-                {isAdmin(window) ? `Admin` : 'Masuk'}
+                {isAdmin() ? `Admin` : 'Masuk'}
               </button>
             </Link>
           )}

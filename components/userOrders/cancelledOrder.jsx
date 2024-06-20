@@ -17,7 +17,7 @@ export const CancelledOrder = () => {
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser(window);
+      const data = dataUser();
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {
@@ -103,7 +103,7 @@ export const CancelledOrder = () => {
                 minimumFractionDigits: 0,
               }).format(item.totalPrice)}
             </p>
-            <p className="text-xs text-secondary text-start">{isAdmin(window) ? item.message.replaceAll("Anda", "USER") : item.message}</p>
+            <p className="text-xs text-secondary text-start">{isAdmin() ? item.message.replaceAll("Anda", "USER") : item.message}</p>
           </div>
           <div className="flex gap-4">
             <Dropdown className="bg-transparent">

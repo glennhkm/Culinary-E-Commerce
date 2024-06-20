@@ -38,7 +38,7 @@ export const CardDetailUser = ({ closeModal, userId }) => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    setIsAdminRole(isAdmin(window));
+    setIsAdminRole(isAdmin());
     getUserData();
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);

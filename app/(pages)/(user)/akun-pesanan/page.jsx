@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 
 const AkunPesanan = () => {
   const [userData, setUserData] = useState(() => {
-    const { id, fullName, address, email, phoneNumber } = dataUser(window);
+    const { id, fullName, address, email, phoneNumber } = dataUser();
     return { id, fullName, address, email, phoneNumber };
   });
   const [lastUserData, setLastUserData] = useState({ ...userData });

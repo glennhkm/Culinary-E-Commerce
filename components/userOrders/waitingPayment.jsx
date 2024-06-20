@@ -21,7 +21,7 @@ export const WaitingPayment = () => {
 
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser(window);
+      const data = dataUser();
       setIdUser(data?.id);
       setLoading(true);
       try {
@@ -56,8 +56,8 @@ export const WaitingPayment = () => {
       }
     };
 
-    setIsAdminRole(isAdmin(window));
-    setIsUserRole(isUser(window));
+    setIsAdminRole(isAdmin());
+    setIsUserRole(isUser());
     getTransaction();
   }, [updateTrigger]);
 

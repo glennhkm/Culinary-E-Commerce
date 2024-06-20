@@ -17,7 +17,7 @@ export const OrderDone = () => {
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser(window);
+      const data = dataUser();
       setLoading(true);
       try {
         const response = await axios.get("/api/transaction", {

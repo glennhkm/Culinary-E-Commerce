@@ -31,8 +31,8 @@ export const CardTransactionDetail = ({ updateTrigger, closeModal, transaction }
       }
     }
 
-    setIsAdminRole(isAdmin(window));
-    setIsUserRole(isUser(window));
+    setIsAdminRole(isAdmin());
+    setIsUserRole(isUser());
     getPaymentConfirmation();
   }, []);
 

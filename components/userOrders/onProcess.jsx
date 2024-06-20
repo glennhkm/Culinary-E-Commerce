@@ -19,7 +19,7 @@ export const OnProcess = () => {
   
   useEffect(() => {
     const getTransaction = async () => {
-      const data = dataUser(window);
+      const data = dataUser();
       setIdUser(data?.id);
       setLoading(true);
       try {
@@ -37,7 +37,7 @@ export const OnProcess = () => {
       }
     }
 
-    setIsUserRole(isUser(window));
+    setIsUserRole(isUser());
     getTransaction();
   }, [updateTrigger]);
 

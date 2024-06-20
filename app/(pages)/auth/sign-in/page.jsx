@@ -21,7 +21,7 @@ const SignIn = () => {
   const callbackUrl = searchParams.get('callbackUrl');
 
   useEffect(() => {
-    if (!isGuest(window)) {
+    if (!isGuest()) {
       router.push("/");
     };
   }, []);
