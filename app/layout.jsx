@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { NextUIProvider } from "@nextui-org/react";
 import { AdminSidebarProvider } from "@/context/adminSidebarContext";
 import { ClientSessionProvider } from "@/components/session/sessionProvider";
+import Head from "next/head";
 
 export const metadata = {
   title: "Fasha Kuliner",
@@ -19,6 +20,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="font-poppins">
+      <Head>
+        <meta name="google-site-verification" content="ElQYOgkeeQ3-djCcKzzrx9yNWK6nifEHUUlbKy1y0ic" />
+      </Head>
       <body className="overflow-x-hidden scrollbar-thin scrollbar-thumb-main_bg/90 scrollbar-track-[#151515] scrollbar-thumb-rounded-xl">
         <ClientSessionProvider>
           <AdminSidebarProvider>
