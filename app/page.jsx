@@ -69,7 +69,7 @@ const MainPage = () => {
             width={500}
             height={500}
             priority
-            alt="logo-kuliner-typo"
+            alt="logo-fasha-kuliner-typo"
           />
         </div>
         <div className="absolute top-0 left-0 w-screen h-screen bg-gradient-to-t from-[#151515] to-transparent via-transparent"></div>
