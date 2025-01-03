@@ -9,7 +9,7 @@ import { UploadDropzone } from "@/lib/uploadthing/component";
 //   endpoint: keyof typeof ourFileRouter;
 // };
 
-export const ImageUpload = ({ onChange, className }) => {
+export const ImageUpload = ({ className }) => {
   return (
     <UploadDropzone
       className={`h-full w-full relative bg-transparent border-dashed border-white/30 gap-0 text-xs duration-200 hover:bg-white/5 cursor-pointer rounded-xl ${className}`}

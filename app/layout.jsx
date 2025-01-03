@@ -10,9 +10,6 @@ import Head from "next/head";
 export const metadata = {
   title: "Fasha Kuliner",
   description: "Fasha Kuliner adalah tempat jualan makanan khas aceh",
-  verification: {
-    google: "ElQYOgkeeQ3-djCcKzzrx9yNWK6nifEHUUlbKy1y0ic"
-  },
   icons: {
     icon: ['/favicon.ico?v=4'],
     apple: ['/apple-touch-icon.png?v=4'],
