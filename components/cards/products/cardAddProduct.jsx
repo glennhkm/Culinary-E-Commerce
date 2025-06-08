@@ -143,7 +143,7 @@ export const CardAddProduct = ({ closeModal, categories, updateTrigger }) => {
                   className={`absolute h-full w-full -top-2 left-0 ${
                     img && "opacity-0 z-50 hover:bg-black/60 hover:opacity-100"
                   }`}
-                  onChange={(url, key) => {
+                  onChange={async (url, key) => {
                     handleImage(url, key, i);
                   }}
                 />
