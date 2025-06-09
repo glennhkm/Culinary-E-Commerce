@@ -86,46 +86,38 @@ const Menu = () => {
   ];
 
   useEffect(() => {
-    const getCategories = async () => {
-      try {
-        const response = await axios.get("/api/category");
-        if (response.status === 200) {
-          setCategories(response.data);
-        }
-      } catch (error) {
-        console.log("ERROR CATEGORIES: ", error);
-      }
-    };
-    const getProducts = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get("/api/product");
-        if (response.status === 200) {
-          const products = response.data;
-          setLoading(false);
+        // First get categories
+        const categoriesResponse = await axios.get("/api/category");
+        if (categoriesResponse.status === 200) {
+          setCategories(categoriesResponse.data);
+        }
+        
+        // Then get products
+        const productsResponse = await axios.get("/api/product");
+        if (productsResponse.status === 200) {
+          const products = productsResponse.data;
           setDataCatalog(products);
           const sort = sortItems.find((item) => item.sortName === "Terbaru");
           sort.sortFunc(products);
         }
+        
+        // Finally get media assets after products are loaded
+        const mediaResponse = await axios.get("/api/mediaAsset/featured");
+        if (mediaResponse.status === 200) {
+          setMediaAssets(mediaResponse.data);
+        }
+        
+        setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.log("ERROR PRODUCTS: ", error);
-      }
-    };
-    const getMediaAssets = async () => {
-      try {
-        const response = await axios.get("/api/mediaAsset/featured");
-        if (response.status === 200) {
-          setMediaAssets(response.data);
-        }
-      } catch (error) {
-        console.log("ERROR MEDIA ASSETS: ", error);
+        console.log("ERROR: ", error);
       }
     };
 
-    getMediaAssets();
-    getCategories();
-    getProducts();
+    fetchData();
   }, []);
 
   const handleSearch = (inputValue) => {

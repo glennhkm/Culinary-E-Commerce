@@ -48,7 +48,6 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
               media.idProduct === item.id && (pathname.includes("/admin") ? media.imageProductType === "FEATURED" : true)
           );
           const mediaURL = mediaFeatured?.mediaURL;
-          console.log("mediaFeatured", mediaURL);
           const formattedPrice = item.price
             .toLocaleString("id-ID", {
               style: "currency",
