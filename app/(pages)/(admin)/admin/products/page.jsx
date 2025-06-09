@@ -34,7 +34,6 @@ const AdminProduct = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [dataCatalog, setDataCatalog] = useState([]);
   const [dataFiltered, setDataFiltered] = useState([]);
-  const [mediaAssets, setMediaAssets] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [updateTrigger, setUpdateTrigger] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -101,12 +100,6 @@ const AdminProduct = () => {
           setDataCatalog(products);
           const sort = sortItems.find((item) => item.sortName === "Terbaru");
           sort.sortFunc(products);
-        }
-        
-        // Finally get media assets after products are loaded
-        const mediaResponse = await axios.get("/api/mediaAsset");
-        if (mediaResponse.status === 200) {
-          setMediaAssets(mediaResponse.data);
         }
         
         setLoading(false);
@@ -263,7 +256,6 @@ const AdminProduct = () => {
       <div className={`grid ${isShowSidebar ? 'grid-cols-3' : 'grid-cols-4'} transition-all gap-6`}>
         <CardCatalog
           data={dataFiltered}
-          mediaAssets={mediaAssets}
           categories={categories}
           updateTrigger={() => setUpdateTrigger((prev) => !prev)}
           loading={loading}

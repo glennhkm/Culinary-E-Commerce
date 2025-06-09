@@ -1,17 +1,45 @@
 "use client";
 
 // import Image from "next/legacy/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CardDetailProduct } from "./cardDetailProduct";
 import { useAdminSidebarContext } from "@/context/adminSidebarContext";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import axios from "axios";
 
-export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger = false, loading }) => {
+export const CardCatalog = ({ data, categories = {}, updateTrigger = false, loading }) => {
   const [editingData, SetEditingData] = useState(null);
+  const [mediaAssets, setMediaAssets] = useState([]);
+  const [loadingMedia, setLoadingMedia] = useState(true);
   const { isShowSidebar } = useAdminSidebarContext();
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const fetchMediaAssets = async () => {
+      setLoadingMedia(true);
+      try {
+        // Use the appropriate endpoint based on the current path
+        const endpoint = pathname.includes("/admin") 
+          ? "/api/mediaAsset" 
+          : "/api/mediaAsset/featured";
+        
+        const response = await axios.get(endpoint);
+        if (response.status === 200) {
+          setMediaAssets(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching media assets:", error);
+      } finally {
+        setLoadingMedia(false);
+      }
+    };
+
+    if (data && data.length > 0) {
+      fetchMediaAssets();
+    }
+  }, [data, pathname]);
 
   const handleProductClick = (item) => {
     if (pathname.includes("/admin")) {
@@ -21,9 +49,12 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
     }
   }
 
+  // If both main data and media are loading, show loading state
+  const isLoading = loading || loadingMedia;
+
   return (
     <>
-      {loading && (
+      {isLoading && (
         <p
         className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} animate-blink font-bold w-full text-center text-xl pt-10 tracking-wide ${
           isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
@@ -32,7 +63,7 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
         Memuat produk...
       </p>
       )}
-      {(data.length <= 0 && !loading) ? (
+      {(data.length <= 0 && !isLoading) ? (
         <p
           className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} font-bold w-full text-center text-xl pt-10 tracking-wide ${
             isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
@@ -41,7 +72,7 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
           Produk tidak tersedia atau tidak cocok!
         </p>
       ) : (
-        data.map((item) => {
+        !isLoading && data.map((item) => {
           let priceAfterDiscount;
           const mediaFeatured = mediaAssets?.find(
             (media) =>
@@ -84,13 +115,19 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
                 </div>
               )}
               <div className="absolute top-0 left-0 -z-10 w-full h-full rounded-xl">
-                <Image
-                  src={mediaURL}
-                  fill
-                  className="rounded-xl object-cover"
-                  loading="lazy"
-                  alt="Product Image"
-                />
+                {mediaURL ? (
+                  <Image
+                    src={mediaURL}
+                    fill
+                    className="rounded-xl object-cover"
+                    loading="lazy"
+                    alt="Product Image"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-800 rounded-xl flex items-center justify-center">
+                    <p className="text-white/50 text-sm">No image</p>
+                  </div>
+                )}
               </div>
               <div
                 className={`flex flex-col text-main_bg font-bold h-full justify-end`}
@@ -119,7 +156,6 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
           data={editingData}
           categories={categories}
           closeModal={() => SetEditingData(null)}
-          mediaAssets={mediaAssets}
           updateTrigger={updateTrigger}
         />) 
       }

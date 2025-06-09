@@ -28,7 +28,6 @@ const Menu = () => {
   const [filterBy, setFilterBy] = useState("Semua");
   const [dataCatalog, setDataCatalog] = useState([]);
   const [dataFiltered, setDataFiltered] = useState([]);
-  const [mediaAssets, setMediaAssets] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -102,12 +101,6 @@ const Menu = () => {
           setDataCatalog(products);
           const sort = sortItems.find((item) => item.sortName === "Terbaru");
           sort.sortFunc(products);
-        }
-        
-        // Finally get media assets after products are loaded
-        const mediaResponse = await axios.get("/api/mediaAsset/featured");
-        if (mediaResponse.status === 200) {
-          setMediaAssets(mediaResponse.data);
         }
         
         setLoading(false);
@@ -265,7 +258,7 @@ const Menu = () => {
           </p>
         )}
         {!loading && (
-          <CardCatalog data={dataFiltered} mediaAssets={mediaAssets} />
+          <CardCatalog data={dataFiltered} />
         )}
       </div>
     </div>

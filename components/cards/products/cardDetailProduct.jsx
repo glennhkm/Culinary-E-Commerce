@@ -13,50 +13,76 @@ import {
 } from "@nextui-org/dropdown";
 import { deleteImage } from "@/lib/uploadthing/deleteImage";
 
-export const CardDetailProduct = ({ closeModal, categories, data, mediaAssets, updateTrigger }) => {
+export const CardDetailProduct = ({ closeModal, categories, data, updateTrigger }) => {
   let [productData, SetProductData] = useState(data);
   const [variants, setVariants] = useState([]);
   const [loading, SetLoading] = useState(false);
-  const [featuredImage, setFeaturedImage] = useState(() => {
-    const featuredImageObject = mediaAssets.find((item) => item.idProduct === data.id && item.imageProductType === "FEATURED");
-    return {
-      url: featuredImageObject?.mediaURL,
-      key: featuredImageObject?.mediaKey,
-    };
-  });
-  const [images, setImages] = useState(() => {
-    let count = 0;
-    const mediaObject = mediaAssets.filter((item) => item.idProduct === data.id && item.imageProductType === "GALLERY");
-    const imageArray = mediaObject?.map((item) => {
-      item.mediaURL && count++;
-      console.log("item: ", count);
-      return {
-        url: item.mediaURL,
-        key: item.mediaKey,
-      }
-    });
-    return count > 0 ? imageArray : [{url: null, key: null}, {url: null, key: null}];
-  });
+  const [featuredImage, setFeaturedImage] = useState(null);
+  const [images, setImages] = useState([{url: null, key: null}, {url: null, key: null}]);
+  const [mediaLoading, setMediaLoading] = useState(true);
 
   useEffect(() => {
-    const getVariants = async () => {
+    const fetchData = async () => {
       SetLoading(true);
+      setMediaLoading(true);
       try {
-        const response = await axios.get(`/api/variant/${productData.id}`);
-        if (response.status === 200) {
-          SetLoading(false);
-          const variants = response.data.map((item) => {
-            return {variantName: item.variantName, additionalPrice: item.additionalPrice, idProduct: item.idProduct}
+        // Fetch variants
+        const variantsResponse = await axios.get(`/api/variant/${productData.id}`);
+        if (variantsResponse.status === 200) {
+          const variantsData = variantsResponse.data.map((item) => {
+            return {
+              variantName: item.variantName, 
+              additionalPrice: item.additionalPrice, 
+              idProduct: item.idProduct
+            }
           });
-          setVariants(variants);
+          setVariants(variantsData);
+        }
+
+        // Fetch media assets
+        const mediaResponse = await axios.get(`/api/mediaAsset/${productData.id}`);
+        if (mediaResponse.status === 200) {
+          const mediaAssets = mediaResponse.data;
+          
+          // Set featured image
+          const featuredImageObject = mediaAssets.find(
+            (item) => item.imageProductType === "FEATURED"
+          );
+          if (featuredImageObject) {
+            setFeaturedImage({
+              url: featuredImageObject.mediaURL,
+              key: featuredImageObject.mediaKey,
+            });
+          }
+          
+          // Set gallery images
+          const galleryImages = mediaAssets.filter(
+            (item) => item.imageProductType === "GALLERY"
+          );
+          if (galleryImages.length > 0) {
+            const imageArray = galleryImages.map((item) => ({
+              url: item.mediaURL,
+              key: item.mediaKey,
+            }));
+            
+            // Ensure we have exactly 2 images, fill with nulls if needed
+            const finalImages = [...imageArray];
+            while (finalImages.length < 2) {
+              finalImages.push({url: null, key: null});
+            }
+            setImages(finalImages.slice(0, 2));
+          }
         }
       } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
         SetLoading(false);
-        console.log("ERROR GET VARIANTS: ", error);
+        setMediaLoading(false);
       }
-    }
-    getVariants();
-  }, []);
+    };
+    
+    fetchData();
+  }, [productData.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
