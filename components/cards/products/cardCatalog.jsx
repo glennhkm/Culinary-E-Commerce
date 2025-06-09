@@ -86,7 +86,7 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
               )}
               <div className="absolute top-0 left-0 -z-10 w-full h-full rounded-xl">
                 <Image
-                  src={mediaURL || '/images/food-default.jpg'}
+                  src={mediaURL}
                   fill
                   className="rounded-xl object-cover"
                   loading="lazy"
