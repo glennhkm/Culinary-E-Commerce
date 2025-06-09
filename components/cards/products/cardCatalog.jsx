@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/legacy/image";
+// import Image from "next/legacy/image";
 import { useState } from "react";
 import { CardDetailProduct } from "./cardDetailProduct";
 import { useAdminSidebarContext } from "@/context/adminSidebarContext";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
 
 export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger = false, loading }) => {
   const [editingData, SetEditingData] = useState(null);
@@ -47,6 +48,7 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
               media.idProduct === item.id && (pathname.includes("/admin") ? media.imageProductType === "FEATURED" : true)
           );
           const mediaURL = mediaFeatured?.mediaURL;
+          console.log("mediaFeatured", mediaURL);
           const formattedPrice = item.price
             .toLocaleString("id-ID", {
               style: "currency",
@@ -85,9 +87,8 @@ export const CardCatalog = ({ data, mediaAssets, categories = {}, updateTrigger 
               <div className="absolute top-0 left-0 -z-10 w-full h-full rounded-xl">
                 <Image
                   src={mediaURL || '/images/food-default.jpg'}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-xl"
+                  fill
+                  className="rounded-xl object-cover"
                   loading="lazy"
                   alt="Product Image"
                 />

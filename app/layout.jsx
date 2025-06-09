@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 import { NextUIProvider } from "@nextui-org/react";
 import { AdminSidebarProvider } from "@/context/adminSidebarContext";
 import { ClientSessionProvider } from "@/components/session/sessionProvider";
-import Head from "next/head";
 
 export const metadata = {
   title: "Fasha Kuliner",

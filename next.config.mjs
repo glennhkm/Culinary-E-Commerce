@@ -4,11 +4,12 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "utfs.io",
+        hostname: "utfs.io", 
         port: "",
         pathname: "/f/**",
       },
     ],
+    unoptimized: true, // Disable image optimization sementara
   },
 };
 
