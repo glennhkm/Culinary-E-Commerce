@@ -24,8 +24,15 @@ import {
   Search,
   TicketPercent,
 } from "lucide-react";
+import { CardAddProduct } from "./cardAddProduct";
 
-export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
+export const CardCatalog = ({
+  updateTrigger = false,
+  isShowSidebar,
+  isAdding = false,
+  setIsAdding,
+  setUpdateTrigger,
+}) => {
   const [editingData, SetEditingData] = useState(null);
   const [mediaAssets, setMediaAssets] = useState([]);
   const [loadingMedia, setLoadingMedia] = useState(true);
@@ -36,7 +43,7 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
   const [dataFiltered, setDataFiltered] = useState([]);
   const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(true);
-  
+
   const router = useRouter();
   const pathname = usePathname();
 
@@ -45,7 +52,9 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
       icon: <ArrowUpWideNarrow size={18} />,
       sortName: "Terbaru",
       sortFunc: (data) => {
-        const dataSorted = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        const dataSorted = data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
         setDataFiltered(dataSorted);
       },
     },
@@ -53,7 +62,9 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
       icon: <ArrowDownWideNarrow size={18} />,
       sortName: "Paling Awal",
       sortFunc: (data) => {
-        const dataSorted = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        const dataSorted = data.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
         setDataFiltered(dataSorted);
       },
     },
@@ -61,7 +72,9 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
       icon: <ArrowUp10 size={18} />,
       sortName: "Termurah",
       sortFunc: (data) => {
-        const dataSorted = data.sort((a, b) => new Date(a.price) - new Date(b.price))
+        const dataSorted = data.sort(
+          (a, b) => new Date(a.price) - new Date(b.price)
+        );
         setDataFiltered(dataSorted);
       },
     },
@@ -69,7 +82,9 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
       icon: <ArrowDown10 size={18} />,
       sortName: "Termahal",
       sortFunc: (data) => {
-        const dataSorted = data.sort((a, b) => new Date(b.price) - new Date(a.price))
+        const dataSorted = data.sort(
+          (a, b) => new Date(b.price) - new Date(a.price)
+        );
         setDataFiltered(dataSorted);
       },
     },
@@ -95,7 +110,7 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
         if (categoriesResponse.status === 200) {
           setCategories(categoriesResponse.data);
         }
-        
+
         // Fetch products
         const productsResponse = await axios.get("/api/product");
         if (productsResponse.status === 200) {
@@ -105,7 +120,6 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
           const sort = sortItems.find((item) => item.sortName === "Terbaru");
           sort.sortFunc(products);
         }
-        
       } catch (error) {
         console.error("ERROR fetching data: ", error);
       } finally {
@@ -121,10 +135,10 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
     const fetchMediaAssets = async () => {
       setLoadingMedia(true);
       try {
-        const endpoint = pathname.includes("/admin") 
-          ? "/api/mediaAsset" 
+        const endpoint = pathname.includes("/admin")
+          ? "/api/mediaAsset"
           : "/api/mediaAsset/featured";
-        
+
         const response = await axios.get(endpoint);
         if (response.status === 200) {
           setMediaAssets(response.data);
@@ -145,7 +159,7 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
     let dataToFilter = dataCatalog;
     const sort = sortItems.find((item) => item.sortName === sortBy);
     setSearchInput(inputValue.toLowerCase());
-    
+
     if (filterBy !== "Semua") {
       const filterObject = categories.find(
         (item) => item.categoryName.toLowerCase() === filterBy.toLowerCase()
@@ -154,7 +168,7 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
         return item.idProductCategory === filterObject.id;
       });
     }
-    
+
     const data = dataToFilter.filter((item) =>
       item.productName.toLowerCase().includes(inputValue.toLowerCase())
     );
@@ -165,7 +179,7 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
     const data = dataCatalog.filter((item) =>
       item.productName.toLowerCase().includes(searchInput)
     );
-    
+
     if (filterObject === "Semua") {
       setFilterBy(filterObject);
       setDataFiltered(data);
@@ -187,16 +201,20 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
     if (pathname.includes("/admin")) {
       SetEditingData(item);
     } else {
-      router.push(`/menu/${item.id}`)
+      router.push(`/menu/${item.id}`);
     }
-  }
+  };
 
   // If both main data and media are loading, show loading state
   const isLoading = loading || loadingMedia;
 
-  const renderControls = () => {    
+  const renderControls = () => {
     return (
-      <div className={`flex w-full justify-between items-center text-main_bg mb-6 ${isShowSidebar ? 'col-span-3' : 'col-span-4'}`}>
+      <div
+        className={`flex w-full justify-between items-center text-main_bg mb-6 ${
+          isShowSidebar ? "col-span-3" : "col-span-4"
+        }`}
+      >
         <Input
           isClearable
           className="w-1/3 sm:max-w-[44%] bg-[#929090] rounded-xl shadow-lg shadow-black/60 py-1"
@@ -291,27 +309,43 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
       {renderControls()}
       {isLoading && (
         <p
-          className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} animate-blink font-bold w-full text-center text-xl pt-10 tracking-wide ${
-            isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
+          className={`${
+            pathname.includes("/admin")
+              ? "text-main_bg/85 text-shadow-default"
+              : "text-primary text-shadow-none"
+          } animate-blink font-bold w-full text-center text-xl pt-10 tracking-wide ${
+            isShowSidebar && pathname.includes("/admin")
+              ? "col-span-3"
+              : "col-span-4"
           }`}
         >
           Memuat produk...
         </p>
       )}
-      {(dataFiltered.length <= 0 && !isLoading) ? (
+      {dataFiltered.length <= 0 && !isLoading ? (
         <p
-          className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} font-bold w-full text-center text-xl pt-10 tracking-wide ${
-            isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
+          className={`${
+            pathname.includes("/admin")
+              ? "text-main_bg/85 text-shadow-default"
+              : "text-primary text-shadow-none"
+          } font-bold w-full text-center text-xl pt-10 tracking-wide ${
+            isShowSidebar && pathname.includes("/admin")
+              ? "col-span-3"
+              : "col-span-4"
           }`}
         >
           Produk tidak tersedia atau tidak cocok!
         </p>
       ) : (
-        !isLoading && dataFiltered.map((item) => {
+        !isLoading &&
+        dataFiltered.map((item) => {
           let priceAfterDiscount;
           const mediaFeatured = mediaAssets?.find(
             (media) =>
-              media.idProduct === item.id && (pathname.includes("/admin") ? media.imageProductType === "FEATURED" : true)
+              media.idProduct === item.id &&
+              (pathname.includes("/admin")
+                ? media.imageProductType === "FEATURED"
+                : true)
           );
           const mediaURL = mediaFeatured?.mediaURL;
           const formattedPrice = item.price
@@ -323,7 +357,8 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
             .replace("IDR", "Rp.")
             .trim();
           if (item.discount && item.discount > 0) {
-            priceAfterDiscount = (item.price) - (item.price * (item.discount / 100));
+            priceAfterDiscount =
+              item.price - item.price * (item.discount / 100);
             priceAfterDiscount = priceAfterDiscount
               .toLocaleString("id-ID", {
                 style: "currency",
@@ -338,7 +373,9 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
               key={item.id}
               onClick={() => handleProductClick(item)}
               className={`cursor-pointer active:scale-100 rounded-xl h-[40vh] relative w-full p-4 flex flex-col gap-3 shadow-xl drop-shadow-2xl shadow-black/50 duration-200 hover:scale-[1.04] group ${
-                (item.stock < 1 && !pathname.includes("/admin")) && "pointer-events-none"
+                item.stock < 1 &&
+                !pathname.includes("/admin") &&
+                "pointer-events-none"
               }`}
             >
               <div className="h-full w-full absolute top-0 left-0 duration-200 bg-gradient-to-t from-primary/95 to-black/20 via-black/20 group-hover:bg-black/40 rounded-xl -z-[5]"></div>
@@ -346,6 +383,12 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
                 <div className="absolute flex justify-center items-center top-0 left-0 h-full w-full z-10 bg-black/75 rounded-xl">
                   <p className="font-bold text-main_bg text-[2.6rem]">
                     HABIS!
+                    {isAdding && (
+                      <CardAddProduct
+                        closeModal={() => setIsAdding(false)}
+                        updateTrigger={() => setUpdateTrigger((prev) => !prev)}
+                      />
+                    )}
                   </p>
                 </div>
               )}
@@ -374,11 +417,16 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
                 )}
                 <div className="flex flex-col gap-2">
                   <p className="capitalize">{item.productName}</p>
-                  <div className="flex gap-2">              
-                    {item.discount > 0 && (
-                      <p>{priceAfterDiscount}</p>
-                      )}
-                    <p className={`${item.discount > 0 && 'line-through font-normal opacity-60'}`}>{formattedPrice}</p>
+                  <div className="flex gap-2">
+                    {item.discount > 0 && <p>{priceAfterDiscount}</p>}
+                    <p
+                      className={`${
+                        item.discount > 0 &&
+                        "line-through font-normal opacity-60"
+                      }`}
+                    >
+                      {formattedPrice}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -392,8 +440,15 @@ export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
           categories={categories}
           closeModal={() => SetEditingData(null)}
           updateTrigger={() => setUpdateTrigger((prev) => !prev)}
-        />) 
-      }
+        />
+      )}
+      {isAdding && (
+        <CardAddProduct
+          closeModal={() => setIsAdding(false)}
+          categories={categories}
+          updateTrigger={() => setUpdateTrigger((prev) => !prev)}
+        />
+      )}
     </>
   );
 };

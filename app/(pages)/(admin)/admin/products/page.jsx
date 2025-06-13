@@ -33,14 +33,11 @@ const AdminProduct = () => {
         <CardCatalog
           updateTrigger={updateTrigger}
           isShowSidebar={isShowSidebar}
+          isAdding={isAdding}
+          setIsAdding={setIsAdding}
+          setUpdateTrigger={setUpdateTrigger}
         />
-      </div>
-      {isAdding && (
-        <CardAddProduct
-          closeModal={() => setIsAdding(false)}
-          updateTrigger={() => setUpdateTrigger((prev) => !prev)}
-        />
-      )}
+      </div>      
     </div>
   );
 };
