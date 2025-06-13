@@ -1,26 +1,126 @@
 "use client";
 
-// import Image from "next/legacy/image";
 import { useState, useEffect } from "react";
 import { CardDetailProduct } from "./cardDetailProduct";
 import { useAdminSidebarContext } from "@/context/adminSidebarContext";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import axios from "axios";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Input,
+} from "@nextui-org/react";
+import {
+  Filter,
+  ChevronDown,
+  ArrowUpDown,
+  ArrowUpWideNarrow,
+  ArrowDownWideNarrow,
+  ArrowDown10,
+  ArrowUp10,
+  Search,
+  TicketPercent,
+} from "lucide-react";
 
-export const CardCatalog = ({ data, categories = {}, updateTrigger = false, loading }) => {
+export const CardCatalog = ({ updateTrigger = false, isShowSidebar }) => {
   const [editingData, SetEditingData] = useState(null);
   const [mediaAssets, setMediaAssets] = useState([]);
   const [loadingMedia, setLoadingMedia] = useState(true);
-  const { isShowSidebar } = useAdminSidebarContext();
+  const [categories, setCategories] = useState([]);
+  const [sortBy, setSortBy] = useState("Terbaru");
+  const [filterBy, setFilterBy] = useState("Semua");
+  const [dataCatalog, setDataCatalog] = useState([]);
+  const [dataFiltered, setDataFiltered] = useState([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [loading, setLoading] = useState(true);
+  
   const router = useRouter();
   const pathname = usePathname();
 
+  const sortItems = [
+    {
+      icon: <ArrowUpWideNarrow size={18} />,
+      sortName: "Terbaru",
+      sortFunc: (data) => {
+        const dataSorted = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        setDataFiltered(dataSorted);
+      },
+    },
+    {
+      icon: <ArrowDownWideNarrow size={18} />,
+      sortName: "Paling Awal",
+      sortFunc: (data) => {
+        const dataSorted = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        setDataFiltered(dataSorted);
+      },
+    },
+    {
+      icon: <ArrowUp10 size={18} />,
+      sortName: "Termurah",
+      sortFunc: (data) => {
+        const dataSorted = data.sort((a, b) => new Date(a.price) - new Date(b.price))
+        setDataFiltered(dataSorted);
+      },
+    },
+    {
+      icon: <ArrowDown10 size={18} />,
+      sortName: "Termahal",
+      sortFunc: (data) => {
+        const dataSorted = data.sort((a, b) => new Date(b.price) - new Date(a.price))
+        setDataFiltered(dataSorted);
+      },
+    },
+    {
+      icon: <TicketPercent size={18} />,
+      sortName: "Diskon",
+      sortFunc: (data) => {
+        const dataSorted = data.sort(
+          (a, b) => new Date(b.discount) - new Date(a.discount)
+        );
+        setDataFiltered(dataSorted);
+      },
+    },
+  ];
+
+  // Fetch initial data (products, categories, media assets)
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch categories
+        const categoriesResponse = await axios.get("/api/category");
+        if (categoriesResponse.status === 200) {
+          setCategories(categoriesResponse.data);
+        }
+        
+        // Fetch products
+        const productsResponse = await axios.get("/api/product");
+        if (productsResponse.status === 200) {
+          const products = productsResponse.data;
+          setDataCatalog(products);
+          // Apply default sort
+          const sort = sortItems.find((item) => item.sortName === "Terbaru");
+          sort.sortFunc(products);
+        }
+        
+      } catch (error) {
+        console.error("ERROR fetching data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [updateTrigger]);
+
+  // Fetch media assets when data is available
   useEffect(() => {
     const fetchMediaAssets = async () => {
       setLoadingMedia(true);
       try {
-        // Use the appropriate endpoint based on the current path
         const endpoint = pathname.includes("/admin") 
           ? "/api/mediaAsset" 
           : "/api/mediaAsset/featured";
@@ -36,10 +136,52 @@ export const CardCatalog = ({ data, categories = {}, updateTrigger = false, load
       }
     };
 
-    if (data && data.length > 0) {
+    if (dataCatalog && dataCatalog.length > 0) {
       fetchMediaAssets();
     }
-  }, [data, pathname]);
+  }, [dataCatalog, pathname]);
+
+  const handleSearch = (inputValue) => {
+    let dataToFilter = dataCatalog;
+    const sort = sortItems.find((item) => item.sortName === sortBy);
+    setSearchInput(inputValue.toLowerCase());
+    
+    if (filterBy !== "Semua") {
+      const filterObject = categories.find(
+        (item) => item.categoryName.toLowerCase() === filterBy.toLowerCase()
+      );
+      dataToFilter = dataCatalog.filter((item) => {
+        return item.idProductCategory === filterObject.id;
+      });
+    }
+    
+    const data = dataToFilter.filter((item) =>
+      item.productName.toLowerCase().includes(inputValue.toLowerCase())
+    );
+    sort.sortFunc(data);
+  };
+
+  const handleFilter = (filterObject) => {
+    const data = dataCatalog.filter((item) =>
+      item.productName.toLowerCase().includes(searchInput)
+    );
+    
+    if (filterObject === "Semua") {
+      setFilterBy(filterObject);
+      setDataFiltered(data);
+    } else {
+      const dataFiltered = data.filter((item) => {
+        return item.idProductCategory === filterObject.id;
+      });
+      setFilterBy(filterObject.categoryName);
+      setDataFiltered(dataFiltered);
+    }
+  };
+
+  const handleSort = (sortObject) => {
+    setSortBy(sortObject.sortName);
+    sortObject.sortFunc(dataFiltered);
+  };
 
   const handleProductClick = (item) => {
     if (pathname.includes("/admin")) {
@@ -52,18 +194,111 @@ export const CardCatalog = ({ data, categories = {}, updateTrigger = false, load
   // If both main data and media are loading, show loading state
   const isLoading = loading || loadingMedia;
 
+  const renderControls = () => {    
+    return (
+      <div className={`flex w-full justify-between items-center text-main_bg mb-6 ${isShowSidebar ? 'col-span-3' : 'col-span-4'}`}>
+        <Input
+          isClearable
+          className="w-1/3 sm:max-w-[44%] bg-[#929090] rounded-xl shadow-lg shadow-black/60 py-1"
+          classNames={{
+            input: [
+              "bg-[#929090]",
+              "group-data-[focus=true]:text-white",
+              "placeholder:text-black/60",
+            ],
+            clearButton: ["text-black"],
+            inputWrapper: [
+              "bg-[#929090]",
+              "group-data-[focus=true]:bg-[#929090]",
+              "group-data-[hover=true]:bg-[#929090]",
+              "!cursor-text",
+            ],
+          }}
+          placeholder="Cari nama produk..."
+          startContent={<Search className="mr-1 text-black" />}
+          onChange={(e) => handleSearch(e.target.value)}
+          onClear={() => handleSearch("")}
+        />
+        <div>
+          <Dropdown className="rounded-xl border-[0.3px] border-main_bg/20 shadow-lg shadow-black/60 bg-[#151515]">
+            <DropdownTrigger>
+              <div className="flex gap-2 cursor-pointer hover:text-main_bg/70 duration-100 items-center">
+                <ArrowUpDown size={20} />
+                <p className="font-normal">
+                  Sort by <span className="font-bold">{sortBy}</span>
+                </p>
+                <ChevronDown size={20} />
+              </div>
+            </DropdownTrigger>
+            <DropdownMenu className="bg-[#151515] text-main_bg">
+              {sortItems.map((item) => (
+                <DropdownItem
+                  onClick={() => handleSort(item)}
+                  key={item.sortName}
+                  className="hover:bg-main_bg duration-100 hover:text-[#151515]"
+                >
+                  <div className="flex gap-2 items-center">
+                    {item.icon}
+                    <p>{item.sortName}</p>
+                  </div>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+        <div>
+          <Dropdown className="rounded-xl border-[0.3px] border-main_bg/20 shadow-lg shadow-black/60 bg-[#151515]">
+            <DropdownTrigger>
+              <div className="flex gap-2 cursor-pointer hover:text-main_bg/70 duration-100 items-center">
+                <Filter size={20} />
+                <p className="font-normal">
+                  Filter by category{" "}
+                  <span className="font-bold">{filterBy}</span>
+                </p>
+                <ChevronDown size={20} />
+              </div>
+            </DropdownTrigger>
+            <DropdownMenu className="bg-[#151515] text-main_bg">
+              <DropdownItem
+                key={"Semua"}
+                onClick={() => handleFilter("Semua")}
+                className="hover:bg-main_bg duration-100 hover:text-[#151515]"
+              >
+                <div className="flex gap-2 items-center">
+                  <p>Semua</p>
+                </div>
+              </DropdownItem>
+              {categories.map((category) => (
+                <DropdownItem
+                  key={category.id}
+                  onClick={() => handleFilter(category)}
+                  className="hover:bg-main_bg duration-100 hover:text-[#151515]"
+                >
+                  <div className="flex gap-2 items-center">
+                    <p>{category.categoryName}</p>
+                  </div>
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
+      {renderControls()}
       {isLoading && (
         <p
-        className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} animate-blink font-bold w-full text-center text-xl pt-10 tracking-wide ${
-          isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
-        }`}
-      >
-        Memuat produk...
-      </p>
+          className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} animate-blink font-bold w-full text-center text-xl pt-10 tracking-wide ${
+            isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
+          }`}
+        >
+          Memuat produk...
+        </p>
       )}
-      {(data.length <= 0 && !isLoading) ? (
+      {(dataFiltered.length <= 0 && !isLoading) ? (
         <p
           className={`${pathname.includes("/admin") ? 'text-main_bg/85 text-shadow-default' : 'text-primary text-shadow-none'} font-bold w-full text-center text-xl pt-10 tracking-wide ${
             isShowSidebar && pathname.includes("/admin") ? "col-span-3" : "col-span-4"
@@ -72,7 +307,7 @@ export const CardCatalog = ({ data, categories = {}, updateTrigger = false, load
           Produk tidak tersedia atau tidak cocok!
         </p>
       ) : (
-        !isLoading && data.map((item) => {
+        !isLoading && dataFiltered.map((item) => {
           let priceAfterDiscount;
           const mediaFeatured = mediaAssets?.find(
             (media) =>
@@ -156,7 +391,7 @@ export const CardCatalog = ({ data, categories = {}, updateTrigger = false, load
           data={editingData}
           categories={categories}
           closeModal={() => SetEditingData(null)}
-          updateTrigger={updateTrigger}
+          updateTrigger={() => setUpdateTrigger((prev) => !prev)}
         />) 
       }
     </>
