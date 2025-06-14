@@ -1,26 +1,7 @@
 "use client";
 
 import { CardCatalog } from "@/components/cards/products/cardCatalog";
-import {
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-} from "@nextui-org/react";
-import axios from "axios";
-import {
-  Filter,
-  ChevronDown,
-  ArrowUpDown,
-  ArrowUpWideNarrow,
-  ArrowDownWideNarrow,
-  ArrowDown10,
-  ArrowUp10,
-  Search,
-  TicketPercent,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 const Menu = () => {
   const [loading, setLoading] = useState(false);
